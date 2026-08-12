@@ -1,19 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: crossplane-vpc-claims
+  name: crossplane-vpc-providerconfig
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
     repoURL: https://github.com/shwetagade1998/crossplane-argocd-vpc.git
     targetRevision: main
-    path: crossplane/claims
+    path: crossplane/providerconfig
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: crossplane-system
   syncPolicy:
     automated:
       prune: true
