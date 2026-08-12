@@ -10,6 +10,8 @@ apiVersion: aws.upbound.io/v1beta1
 kind: ProviderConfig
 metadata:
   name: aws-provider-config
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   credentials:
     source: InjectedIdentity
