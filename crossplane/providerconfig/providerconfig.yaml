@@ -14,7 +14,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   credentials:
-    source: InjectedIdentity
+    source: None
 
 # --- Alternative: static-key Secret (use if not on EC2) ---
 # spec:
