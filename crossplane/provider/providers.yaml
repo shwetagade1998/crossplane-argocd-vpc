@@ -15,14 +15,3 @@ metadata:
   name: provider-aws-ec2
 spec:
   package: xpkg.upbound.io/upbound/provider-aws-ec2:v1.19.0
-  runtimeConfigRef:
-    name: provider-aws-ec2-config
----
-apiVersion: pkg.crossplane.io/v1beta1
-kind: DeploymentRuntimeConfig
-metadata:
-  name: provider-aws-ec2-config
-spec:
-  deploymentTemplate:
-    spec:
-      replicas: 1
