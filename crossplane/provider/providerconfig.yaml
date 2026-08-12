@@ -1,0 +1,24 @@
+# Running Crossplane on an EC2 instance: use the instance's own IAM role
+# instead of static access keys. The provider pod picks up credentials
+# automatically from the EC2 instance metadata service (IMDS).
+#
+# Requirements:
+#   - An IAM role attached to this EC2 instance with VPC permissions
+#   - IMDS reachable from the pod (bump hop limit to 2 if IMDSv2-hardened)
+#
+apiVersion: aws.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: aws-provider-config
+spec:
+  credentials:
+    source: InjectedIdentity
+
+# --- Alternative: static-key Secret (use if not on EC2) ---
+# spec:
+#   credentials:
+#     source: Secret
+#     secretRef:
+#       namespace: crossplane-system
+#       name: aws-creds
+#       key: creds

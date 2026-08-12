@@ -1,0 +1,32 @@
+apiVersion: network.example.org/v1alpha1
+kind: VPC
+metadata:
+  name: demo-vpc
+  namespace: default
+spec:
+  compositionRef:
+    name: xvpcs.network.example.org
+  region: us-east-1
+  vpcCidrBlock: 10.0.0.0/16
+  enableDnsSupport: true
+  enableDnsHostnames: true
+  tags:
+    Environment: dev
+    ManagedBy: crossplane
+  subnets:
+    - name: public-a
+      cidrBlock: 10.0.1.0/24
+      availabilityZone: us-east-1a
+      public: true
+    - name: public-b
+      cidrBlock: 10.0.2.0/24
+      availabilityZone: us-east-1b
+      public: true
+    - name: private-a
+      cidrBlock: 10.0.11.0/24
+      availabilityZone: us-east-1a
+      public: false
+    - name: private-b
+      cidrBlock: 10.0.12.0/24
+      availabilityZone: us-east-1b
+      public: false

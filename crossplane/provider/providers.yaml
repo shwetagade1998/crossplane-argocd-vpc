@@ -1,0 +1,28 @@
+---
+# Meta-provider: pulls in the AWS provider family config.
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-family-aws
+spec:
+  package: xpkg.upbound.io/upbound/provider-family-aws:v1.19.0
+---
+# EC2 service provider — this is where VPC, Subnet, InternetGateway,
+# RouteTable, NatGateway, etc. live in the Upbound AWS provider family.
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-aws-ec2
+spec:
+  package: xpkg.upbound.io/upbound/provider-aws-ec2:v1.19.0
+  runtimeConfigRef:
+    name: provider-aws-ec2-config
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: provider-aws-ec2-config
+spec:
+  deploymentTemplate:
+    spec:
+      replicas: 1

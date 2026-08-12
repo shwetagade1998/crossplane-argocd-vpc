@@ -1,0 +1,83 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xvpcs.network.example.org
+  labels:
+    provider: aws-ec2
+spec:
+  compositeTypeRef:
+    apiVersion: network.example.org/v1alpha1
+    kind: XVPC
+  mode: Pipeline
+  pipeline:
+    - step: create-vpc
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: vpc
+            base:
+              apiVersion: ec2.aws.upbound.io/v1beta1
+              kind: VPC
+              spec:
+                providerConfigRef:
+                  name: aws-provider-config
+                forProvider:
+                  region: ""
+                  cidrBlock: ""
+                  enableDnsSupport: true
+                  enableDnsHostnames: true
+                  tags: {}
+            patches:
+              - fromFieldPath: spec.region
+                toFieldPath: spec.forProvider.region
+              - fromFieldPath: spec.vpcCidrBlock
+                toFieldPath: spec.forProvider.cidrBlock
+              - fromFieldPath: spec.enableDnsSupport
+                toFieldPath: spec.forProvider.enableDnsSupport
+              - fromFieldPath: spec.enableDnsHostnames
+                toFieldPath: spec.forProvider.enableDnsHostnames
+              - fromFieldPath: spec.tags
+                toFieldPath: spec.forProvider.tags
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.atProvider.id
+                toFieldPath: status.vpcId
+                policy:
+                  fromFieldPath: Optional
+
+    - step: create-subnets
+      functionRef:
+        name: function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            {{- range $i, $subnet := .observed.composite.resource.spec.subnets }}
+            ---
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: Subnet
+            metadata:
+              name: subnet-{{ $subnet.name }}
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: subnet-{{ $subnet.name }}
+            spec:
+              providerConfigRef:
+                name: aws-provider-config
+              forProvider:
+                region: {{ $.observed.composite.resource.spec.region | quote }}
+                vpcIdSelector:
+                  matchControllerRef: true
+                cidrBlock: {{ $subnet.cidrBlock | quote }}
+                availabilityZone: {{ $subnet.availabilityZone | quote }}
+                mapPublicIpOnLaunch: {{ $subnet.public | default false }}
+                tags:
+                  Name: "{{ $.observed.composite.resource.metadata.name }}-{{ $subnet.name }}"
+            {{- end }}
+
+    - step: auto-ready
+      functionRef:
+        name: function-auto-ready

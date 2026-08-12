@@ -1,0 +1,72 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xvpcs.network.example.org
+spec:
+  group: network.example.org
+  names:
+    kind: XVPC
+    plural: xvpcs
+  claimNames:
+    kind: VPC
+    plural: vpcs
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                region:
+                  type: string
+                  description: AWS region to create the VPC and subnets in.
+                vpcCidrBlock:
+                  type: string
+                  description: CIDR block for the VPC, e.g. 10.0.0.0/16.
+                enableDnsSupport:
+                  type: boolean
+                  default: true
+                enableDnsHostnames:
+                  type: boolean
+                  default: true
+                tags:
+                  type: object
+                  additionalProperties:
+                    type: string
+                subnets:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      cidrBlock:
+                        type: string
+                      availabilityZone:
+                        type: string
+                      public:
+                        type: boolean
+                        default: false
+                    required:
+                      - name
+                      - cidrBlock
+                      - availabilityZone
+              required:
+                - region
+                - vpcCidrBlock
+                - subnets
+            status:
+              type: object
+              properties:
+                vpcId:
+                  type: string
+                subnetIds:
+                  type: array
+                  items:
+                    type: string
+          required:
+            - spec
